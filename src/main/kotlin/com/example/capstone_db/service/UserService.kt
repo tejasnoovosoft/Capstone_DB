@@ -4,6 +4,7 @@ import com.example.capstone_db.model.Address
 import com.example.capstone_db.model.User
 import com.example.capstone_db.repository.UserRepository
 import com.example.capstone_db.viewmodel.UserDTO
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,5 +29,17 @@ class UserService(private val userRepository: UserRepository, private val addres
 
     fun isUserExists(email:String) : User? {
         return userRepository.findByEmail(email)
+    }
+
+    fun getUsers(): List<User>? {
+        return userRepository.findAll()
+    }
+
+    fun getUserById(userId: Long): User? {
+        return userRepository.findByIdOrNull(userId)
+    }
+
+    fun deleteUserById(userId: Long) {
+        userRepository.deleteById(userId)
     }
 }
