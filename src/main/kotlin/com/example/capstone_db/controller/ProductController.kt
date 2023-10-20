@@ -2,34 +2,35 @@ package com.example.capstone_db.controller
 
 import com.example.capstone_db.model.Product
 import com.example.capstone_db.service.ProductService
-import com.example.capstone_db.viewmodel.ProductDTO
+import com.example.capstone_db.viewmodel.ProductViewModel
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/products")
 class ProductController(private val productService: ProductService) {
     @PostMapping
-    fun addProduct(@RequestBody productDTO: ProductDTO): Product? {
+    fun addProduct(@RequestBody productViewModel: ProductViewModel): Product? {
         val product = Product(
-            productName = productDTO.productName,
-            productPrize = productDTO.productPrize,
-            category = productDTO.category
+            productName = productViewModel.productName,
+            productPrize = productViewModel.productPrize,
+            category = productViewModel.category
         )
         return productService.addProduct(product)
     }
 
     @GetMapping
-    fun getProducts(): List<Product>? {
+    fun getProducts(): List<ProductViewModel>? {
         return productService.getProducts()
     }
 
     @GetMapping("/{productId}")
-    fun findProductById(@PathVariable productId: Long): Product? {
+    fun findProductById(@PathVariable productId: Long): ProductViewModel? {
         return productService.findProductById(productId)
     }
 
     @GetMapping("/category/{category}")
-    fun findProductsByCategory(@PathVariable category: String): List<Product>? {
+    fun findProductsByCategory(@PathVariable category: String): List<ProductViewModel>? {
         return productService.findProductsByCategory(category)
     }
 
@@ -37,7 +38,7 @@ class ProductController(private val productService: ProductService) {
     fun findProductsBetweenPrice(
         @RequestParam("minPrice") minPrice: Double,
         @RequestParam("maxPrice") maxPrice: Double
-    ): List<Product>? {
+    ): List<ProductViewModel>? {
         return productService.findProductsBetweenPrice(minPrice, maxPrice)
     }
 
@@ -47,7 +48,13 @@ class ProductController(private val productService: ProductService) {
     }
 
     @PutMapping("{productId}")
-    fun updateProductById(@PathVariable productId: Long, @RequestBody productDTO: ProductDTO) {
-        return productService.updateProductById(productId, productDTO)
+    fun updateProductById(@PathVariable productId: Long, @RequestBody productViewModel: ProductViewModel) {
+        return productService.updateProductById(productId, productViewModel)
+    }
+
+    @GetMapping("/product?search={productName}")
+    fun getProductByName(@PathVariable productName: String): ResponseEntity<ProductViewModel>? {
+        val product = productService.getProductByName(productName)
+        return ResponseEntity.ok(product)
     }
 }

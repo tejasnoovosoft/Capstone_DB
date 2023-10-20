@@ -17,5 +17,5 @@ data class OrderItem(
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    val order: Orders
+    var order: Order? = null
 )

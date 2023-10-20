@@ -2,13 +2,23 @@ package com.example.capstone_db.service
 
 import com.example.capstone_db.model.Address
 import com.example.capstone_db.model.User
+import com.example.capstone_db.repository.AddressRepository
 import com.example.capstone_db.repository.UserRepository
+import com.example.capstone_db.viewmodel.AddressViewModel
 import com.example.capstone_db.viewmodel.UserDTO
+import com.example.capstone_db.viewmodel.UserViewModel
+import com.example.capstone_db.viewmodel.convertIntoUserViewModel
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
-class UserService(private val userRepository: UserRepository, private val addressService: AddressService) {
+class UserService(
+    private val userRepository: UserRepository,
+    private val addressService: AddressService,
+    private val addressRepository: AddressRepository
+) {
     fun addUser(userDTO: UserDTO): User? {
         val existingAddress =
             addressService.findAddressByDetails(userDTO.address.street, userDTO.address.city, userDTO.address.pinCode)
@@ -27,19 +37,45 @@ class UserService(private val userRepository: UserRepository, private val addres
         return userRepository.save(user)
     }
 
-    fun isUserExists(email:String) : User? {
+    fun getUserByEmail(email:String) : User? {
         return userRepository.findByEmail(email)
     }
 
-    fun getUsers(): List<User>? {
-        return userRepository.findAll()
+    fun getUsers(): List<UserViewModel> {
+        val users = userRepository.findAll()
+        return users.map {
+            convertIntoUserViewModel(it)
+        }
     }
 
-    fun getUserById(userId: Long): User? {
-        return userRepository.findByIdOrNull(userId)
+    fun getUserById(userId: Long): UserViewModel? {
+        val user = userRepository.findByIdOrNull(userId)
+        return user?.let { convertIntoUserViewModel(it) }
     }
 
     fun deleteUserById(userId: Long) {
         userRepository.deleteById(userId)
+    }
+
+    fun updateAddress(addressViewModel: AddressViewModel, userId: Long): ResponseEntity<String> {
+        val address = Address(
+            street = addressViewModel.street,
+            city = addressViewModel.city,
+            pinCode = addressViewModel.pinCode
+        )
+
+        val existingAddress = addressRepository.findAddressByDetails(address.street, address.city, address.pinCode)
+
+        if (existingAddress == null) {
+            addressRepository.save(address)
+        }
+
+        val updatedRows = userRepository.updateUserAddress(userId, address)
+
+        return if (updatedRows > 0) {
+            ResponseEntity.status(HttpStatus.OK).body("User Address Updated Successfully")
+        } else {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user address")
+        }
     }
 }

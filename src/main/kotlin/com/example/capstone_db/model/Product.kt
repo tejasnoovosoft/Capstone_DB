@@ -8,7 +8,7 @@ data class Product(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val productId: Long? = null,
-    @Column(name = "product_name", length = 25)
+    @Column(name = "product_name", length = 25, unique = true)
     val productName: String,
     @Column(name = "price")
     val productPrize: Double,

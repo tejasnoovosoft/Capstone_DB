@@ -5,18 +5,23 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "orders")
-data class Orders(
+data class Order(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val orderId: Long? = null,
 
-    @OneToMany(mappedBy = "order", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "order", cascade = [CascadeType.REMOVE])
     val products: MutableList<OrderItem>? = null,
 
     @Column(name = "order_date")
-    val orderDate: LocalDate? = null,
+    var orderDate: LocalDate? = null,
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    val user: User
-)
+    var user: User? = null
+) {
+    @PrePersist
+    fun prePersist() {
+        orderDate = LocalDate.now()
+    }
+}

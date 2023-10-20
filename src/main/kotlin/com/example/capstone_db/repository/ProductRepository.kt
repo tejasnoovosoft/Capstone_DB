@@ -24,12 +24,15 @@ interface ProductRepository : JpaRepository<Product, Long> {
         @Param("category") category: String
     ): Int
 
-/*    @Modifying
-    @Query("INSERT INTO Product (productId, productName, productPrize, category) VALUES (:productId, :productName, :productPrize, :category)")
+    @Modifying
+    @Query(
+        "INSERT INTO products (product_id, product_name, price, category) VALUES (:productId, :productName, :productPrize, :category)",
+        nativeQuery = true
+    )
     fun saveProductWithId(
         @Param("productId") productId: Long,
         @Param("productName") productName: String,
         @Param("productPrize") productPrize: Double,
         @Param("category") category: String
-    ): Int*/
+    ): Int
 }
