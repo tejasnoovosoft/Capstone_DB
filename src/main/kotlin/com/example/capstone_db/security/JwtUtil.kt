@@ -12,8 +12,8 @@ import java.util.function.Function
 @Component
 class JwtUtil(@Value("\${jwt.secret}") private val secret: String) {
 
-    @Value("\${jwt.expiration.ms}")
-    private val expiration: Long = 86400000
+
+    private val expiration: Long =  600000
 
     fun generateToken(userDetails: UserDetails): String {
         return createToken(userDetails.username)
