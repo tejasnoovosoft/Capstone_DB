@@ -4,12 +4,14 @@ import com.example.capstone_db.model.Product
 import com.example.capstone_db.service.ProductService
 import com.example.capstone_db.viewmodel.ProductViewModel
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/products")
 class ProductController(private val productService: ProductService) {
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun addProduct(@RequestBody productViewModel: ProductViewModel): Product? {
         val product = Product(
             productName = productViewModel.productName,
@@ -43,11 +45,13 @@ class ProductController(private val productService: ProductService) {
     }
 
     @DeleteMapping("{productId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun deleteProductById(@PathVariable productId: Long) {
         return productService.deleteProductById(productId)
     }
 
     @PutMapping("{productId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     fun updateProductById(@PathVariable productId: Long, @RequestBody productViewModel: ProductViewModel) {
         return productService.updateProductById(productId, productViewModel)
     }
