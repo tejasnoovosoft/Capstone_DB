@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 @Repository
 interface OrderRepository : JpaRepository<Order, Long> {
-    fun findByUser_userId(userId: Long): List<Order>?
+    fun findByUserUserId(userId: Long): List<Order>?
     fun findByUserUserIdAndOrderDateBetween(userId: Long, startDate: LocalDate, endDate: LocalDate): List<Order>?
 
     fun findByUserUserIdAndProductsIsDelivered(userId: Long, isDelivered: Boolean): List<Order>?

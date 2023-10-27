@@ -1,6 +1,5 @@
 package com.example.capstone_db.controller
 
-import com.example.capstone_db.repository.UserRepository
 import com.example.capstone_db.service.OrderService
 import com.example.capstone_db.service.UserService
 import com.example.capstone_db.viewmodel.OrderViewModel
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/users")
 class UserController(
     private val userService: UserService,
-    private val userRepository: UserRepository,
     private val orderService: OrderService
 ) {
 

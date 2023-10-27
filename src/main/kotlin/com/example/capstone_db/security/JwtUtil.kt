@@ -46,13 +46,6 @@ class JwtUtil(@Value("\${jwt.secret}") private val secret: String) {
         return extractExpiration(token).before(Date())
     }
 
-    fun extractClaims(token: String): Claims {
-        return Jwts.parser()
-            .setSigningKey(secret)
-            .parseClaimsJws(token)
-            .body
-    }
-
     fun validateToken(token: String, userDetails: UserDetails): Boolean {
         val username = extractUsername(token)
         return username == userDetails.username && !isTokenExpired(token)

@@ -3,7 +3,6 @@ package com.example.capstone_db.security
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -41,10 +40,6 @@ class SecurityConfig(private val jwtFilter: JwtFilter, private val userDetailsSe
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
-
-    /*override fun configure(auth: AuthenticationManagerBuilder) {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder())
-    }*/
 }
 
-fun String.toGrantedAuthority() = SimpleGrantedAuthority("$this")
+fun String.toGrantedAuthority() = SimpleGrantedAuthority(this)

@@ -33,7 +33,6 @@ class OrderController(private val orderService: OrderService) {
         return orderService.getOrdersByUserId(userId)
     }
 
-
     @DeleteMapping("/{userId}/orders/{orderId}")
     fun deleteOrderByOrderId(@PathVariable userId: Long, @PathVariable orderId: Long): ResponseEntity<String> {
         return orderService.deleteOrderByOrderId(userId, orderId)

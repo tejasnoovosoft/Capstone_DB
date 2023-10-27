@@ -42,7 +42,7 @@ class OrderService(
     }
 
     fun getOrdersByUserId(userId: Long): List<OrderViewModel>? {
-        val orders = orderRepository.findByUser_userId(userId)
+        val orders = orderRepository.findByUserUserId(userId)
         return orders?.map { convertIntoOrderViewModel(it) }
     }
 
@@ -63,16 +63,15 @@ class OrderService(
 
     fun deleteProductFromOrderList(userId: Long, orderId: Long, productId: Long): ResponseEntity<String> {
         val user = userRepository.existsById(userId)
-        if (user) {
-            orderRepository.findById(orderId).get() ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Order is Not Found")
-            val orderItem = orderItemRepository.findByProduct_productId(productId)
+        return if (user) {
+            orderRepository.findById(orderId).get()
+            val orderItem = orderItemRepository.findByProductProductId(productId)
             orderItem?.let {
                 orderItemRepository.delete(it)
             } ?: throw ProductNotFoundException("Product with ID $productId not found")
-            return ResponseEntity.status(HttpStatus.OK).body("Product Deleted Successfully")
+            ResponseEntity.status(HttpStatus.OK).body("Product Deleted Successfully")
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid User")
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid User")
         }
     }
 
