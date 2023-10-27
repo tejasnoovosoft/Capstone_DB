@@ -20,7 +20,6 @@ class AuthService(
     private val jwtUtil: JwtUtil
 ) {
     fun registerUser(registerViewModel: RegisterViewModel): UserViewModel {
-
         val user = User(
             username = registerViewModel.username,
             email = registerViewModel.email,

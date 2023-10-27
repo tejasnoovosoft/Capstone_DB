@@ -9,4 +9,5 @@ interface UserRepository : JpaRepository<User, Long>{
     fun findByUsername(username: String): User?
 
     fun deleteUserByUsername(username: String): Int
+
 }
