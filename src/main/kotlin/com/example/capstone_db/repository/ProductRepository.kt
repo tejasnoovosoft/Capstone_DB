@@ -12,9 +12,6 @@ interface ProductRepository : JpaRepository<Product, Long> {
     fun findByproductName(name: String): Product?
     fun findByCategory(category: String): List<Product>?
 
-    @Query(value = "SELECT * FROM products WHERE price between :minPrice and :maxPrice", nativeQuery = true)
-    fun findProductsBetweenPrice(minPrice: Double, maxPrice: Double): List<Product>?
-
     @Modifying
     @Query("UPDATE Product p SET p.productName = :productName, p.productPrize = :productPrize, p.category = :category WHERE p.productId = :productId")
     fun updateProduct(
@@ -37,5 +34,5 @@ interface ProductRepository : JpaRepository<Product, Long> {
     ): Int
 
     fun findProductByProductNameContaining(name: String): List<Product>?
-
+    fun findProductsByProductPrizeBetween(minPrice: Double, maxPrice: Double): List<Product>?
 }

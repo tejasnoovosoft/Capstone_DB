@@ -31,7 +31,7 @@ class ProductService(private val productRepository: ProductRepository) {
     }
 
     fun findProductsBetweenPrice(minPrice: Double, maxPrice: Double): List<ProductViewModel>? {
-        val products = productRepository.findProductsBetweenPrice(minPrice, maxPrice)
+        val products = productRepository.findProductsByProductPrizeBetween(minPrice, maxPrice)
         return products?.map { convertToProductViewModel(it) }
     }
 
