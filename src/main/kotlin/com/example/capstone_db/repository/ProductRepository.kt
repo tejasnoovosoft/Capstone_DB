@@ -34,5 +34,6 @@ interface ProductRepository : JpaRepository<Product, Long> {
     ): Int
 
     fun findProductByProductNameContaining(name: String): List<Product>?
+
     fun findProductsByProductPrizeBetween(minPrice: Double, maxPrice: Double): List<Product>?
 }
