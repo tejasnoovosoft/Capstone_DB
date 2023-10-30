@@ -6,6 +6,7 @@ import com.example.capstone_db.viewmodel.ProductViewModel
 import com.example.capstone_db.viewmodel.convertToProductViewModel
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
@@ -60,5 +61,10 @@ class ProductService(private val productRepository: ProductRepository) {
     fun getProductByName(productName: String): ProductViewModel? {
         val product = productRepository.findByproductName(productName)
         return product?.let { convertToProductViewModel(it) }
+    }
+
+    fun searchProducts(product: String): ResponseEntity<List<ProductViewModel>> {
+        val products = productRepository.findProductByProductNameContaining(product)
+        return ResponseEntity.ok(products?.map { convertToProductViewModel(it) })
     }
 }

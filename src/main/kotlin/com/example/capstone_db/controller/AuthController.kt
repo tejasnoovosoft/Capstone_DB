@@ -1,6 +1,7 @@
 package com.example.capstone_db.controller
 
 import com.example.capstone_db.service.AuthService
+import com.example.capstone_db.viewmodel.ChangePasswordInputViewModel
 import com.example.capstone_db.viewmodel.LoginViewModel
 import com.example.capstone_db.viewmodel.RegisterViewModel
 import com.example.capstone_db.viewmodel.UserViewModel
@@ -15,8 +16,8 @@ import java.security.Principal
 class AuthController(private val authService: AuthService) {
 
     @PostMapping("/register")
-    fun registerUser(@RequestBody registerViewModel: RegisterViewModel): UserViewModel {
-        return authService.registerUser(registerViewModel)
+    fun registerUser(@RequestBody registerViewModel: RegisterViewModel): ResponseEntity<Any> {
+        return ResponseEntity.ok(authService.registerUser(registerViewModel))
     }
 
     @PostMapping("/login")
@@ -45,5 +46,21 @@ class AuthController(private val authService: AuthService) {
     @PreAuthorize("hasAuthority('USER')")
     fun getUserDetails(principal: Principal): UserViewModel? {
         return authService.getLoggedInUser(principal.name)
+    }
+
+    @PatchMapping("/login/{userId}/reset-password")
+    fun resetPassword(
+        @PathVariable userId: Long,
+        @RequestBody passwordInputViewModel: ChangePasswordInputViewModel
+    ): String {
+        return authService.resetPassword(
+            userId,
+            passwordInputViewModel.newPassword
+        )
+    }
+
+    @DeleteMapping("/login/{userId}/deactivate")
+    fun deactivateAccount(@PathVariable userId: Long): ResponseEntity<String> {
+        return authService.deactivateAccount(userId)
     }
 }

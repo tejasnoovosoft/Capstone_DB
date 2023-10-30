@@ -8,7 +8,6 @@ import com.example.capstone_db.repository.ProductRepository
 import com.example.capstone_db.repository.UserRepository
 import com.example.capstone_db.viewmodel.OrderViewModel
 import com.example.capstone_db.viewmodel.convertIntoOrderViewModel
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -26,7 +25,7 @@ class OrderService(
         val savedOrder = orderRepository.save(order)
         savedOrder.products?.forEach {
             it.product?.let { product ->
-                val existedProduct = productRepository.findByIdOrNull(product.productId)
+                val existedProduct = productRepository.findByproductName(product.productName)
                 if (existedProduct != null) {
                     val orderItem = OrderItem(
                         product = existedProduct,
@@ -35,6 +34,7 @@ class OrderService(
                     )
                     orderItemRepository.save(orderItem)
                 } else {
+                    orderRepository.deleteById(savedOrder.orderId!!)
                     throw ProductNotFoundException("Product with name ${product.productName} not found")
                 }
             }

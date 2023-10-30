@@ -26,7 +26,7 @@ interface ProductRepository : JpaRepository<Product, Long> {
 
     @Modifying
     @Query(
-        "INSERT INTO products (product_id, product_name, price, category) VALUES (:productId, :productName, :productPrize, :category)",
+        "INSERT INTO products (id, product_name, price, category) VALUES (:productId, :productName, :productPrize, :category)",
         nativeQuery = true
     )
     fun saveProductWithId(
@@ -35,4 +35,7 @@ interface ProductRepository : JpaRepository<Product, Long> {
         @Param("productPrize") productPrize: Double,
         @Param("category") category: String
     ): Int
+
+    fun findProductByProductNameContaining(name: String): List<Product>?
+
 }

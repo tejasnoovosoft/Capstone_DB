@@ -61,4 +61,9 @@ class ProductController(private val productService: ProductService) {
         val product = productService.getProductByName(productName)
         return ResponseEntity.ok(product)
     }
+
+    @GetMapping("/search")
+    fun searchProducts(@RequestParam product: String): ResponseEntity<List<ProductViewModel>> {
+        return productService.searchProducts(product)
+    }
 }

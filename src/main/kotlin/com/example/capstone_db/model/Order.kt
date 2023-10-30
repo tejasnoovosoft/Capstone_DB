@@ -8,6 +8,7 @@ import java.time.LocalDate
 data class Order(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     val orderId: Long? = null,
 
     @OneToMany(mappedBy = "order", cascade = [CascadeType.REMOVE])

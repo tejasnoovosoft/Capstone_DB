@@ -8,14 +8,14 @@ data class OrderItem(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.PERSIST])
     @JoinColumn(name = "product_id")
     val product: Product? = null,
 
     @Column(name = "is_delivered")
     val isDelivered: Boolean? = null,
 
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.PERSIST])
     @JoinColumn(name = "order_id")
     var order: Order? = null
 )
