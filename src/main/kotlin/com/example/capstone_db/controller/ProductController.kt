@@ -4,6 +4,7 @@ import com.example.capstone_db.model.Product
 import com.example.capstone_db.service.ImageService
 import com.example.capstone_db.service.ProductService
 import com.example.capstone_db.viewmodel.ProductOutputViewModel
+import com.example.capstone_db.viewmodel.ProductViewModel
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -15,16 +16,13 @@ class ProductController(private val productService: ProductService, private val 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     fun addProduct(
-        @RequestParam file: MultipartFile,
-        @RequestParam productName: String,
-        @RequestParam productPrize: Double,
-        @RequestParam category: String
+        @RequestPart productViewModel: ProductViewModel, @RequestPart file: MultipartFile
     ): Product? {
         val image = imageService.convertToImage(file)
         val product = Product(
-            productName = productName,
-            productPrize = productPrize,
-            category = category,
+            productName = productViewModel.productName,
+            productPrize = productViewModel.productPrize,
+            category = productViewModel.category,
             image = image
         )
         return productService.addProduct(product)
