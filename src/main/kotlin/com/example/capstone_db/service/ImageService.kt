@@ -17,18 +17,20 @@ class ImageService(
     @Value("\${imageserver}")
     private val uploadPath: String // Specify the upload directory in your application.properties
 ) {
-    fun convertToImage(file: MultipartFile): Image {
-        val uuid = UUID.randomUUID().toString()
-        val extension = file.originalFilename?.substringAfterLast('.')
-        val fileName = "$uuid.$extension"
-        val filePath = "$uploadPath${File.separator}$fileName"
+    fun convertToImage(file: List<MultipartFile>): List<Image> {
+        return file.map {
+            val uuid = UUID.randomUUID().toString()
+            val extension = it.originalFilename?.substringAfterLast('.')
+            val fileName = "$uuid.$extension"
+            val filePath = "$uploadPath${File.separator}$fileName"
 
-        try {
-            Files.copy(file.inputStream, File(filePath).toPath(), StandardCopyOption.REPLACE_EXISTING)
-            val imageUrl = "$baseUrl/$fileName"
-            return Image(url = imageUrl)
-        } catch (e: Exception) {
-            throw RuntimeException("Failed to save image: ${e.message}")
+            try {
+                Files.copy(it.inputStream, File(filePath).toPath(), StandardCopyOption.REPLACE_EXISTING)
+                val imageUrl = "$baseUrl/$fileName"
+                Image(url = imageUrl)
+            } catch (e: Exception) {
+                throw RuntimeException("Failed to save image: ${e.message}")
+            }
         }
     }
 }

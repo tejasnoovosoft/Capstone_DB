@@ -12,7 +12,7 @@ data class ProductOutputViewModel(
     val productName: String,
     val productPrize: Double,
     val category: String,
-    val imageUrl: String
+    val imageUrl: List<String>
 )
 
 fun convertToProductOutputViewModel(product: Product): ProductOutputViewModel {
@@ -21,6 +21,6 @@ fun convertToProductOutputViewModel(product: Product): ProductOutputViewModel {
         productName = product.productName,
         productPrize = product.productPrize,
         category = product.category,
-        imageUrl = product.image.url
+        imageUrl = product.image.map { it.url }
     )
 }

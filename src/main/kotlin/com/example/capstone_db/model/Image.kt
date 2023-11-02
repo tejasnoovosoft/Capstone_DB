@@ -9,5 +9,5 @@ data class Image(
     val id: Long? = null,
 
     @Column(name = "url", columnDefinition = "TEXT")
-    val url: String
+    val url: String,
 )

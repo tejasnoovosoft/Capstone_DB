@@ -16,7 +16,7 @@ class ProductController(private val productService: ProductService, private val 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     fun addProduct(
-        @RequestPart productViewModel: ProductViewModel, @RequestPart file: MultipartFile
+        @RequestPart productViewModel: ProductViewModel, @RequestPart file: List<MultipartFile>
     ): Product? {
         val image = imageService.convertToImage(file)
         val product = Product(
