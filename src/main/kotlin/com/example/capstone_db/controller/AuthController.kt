@@ -7,7 +7,6 @@ import com.example.capstone_db.viewmodel.RegisterViewModel
 import com.example.capstone_db.viewmodel.UserViewModel
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.security.Principal
 
@@ -28,12 +27,6 @@ class AuthController(private val authService: AuthService) {
     @GetMapping("/current")
     fun currentLoggedInUser(principal: Principal): UserViewModel? {
         return authService.getLoggedInUser(principal.name)
-    }
-
-    @GetMapping("/logout")
-    fun logout(): String {
-        SecurityContextHolder.clearContext()
-        return "redirect:/login"
     }
 
     @GetMapping("/current/admin")

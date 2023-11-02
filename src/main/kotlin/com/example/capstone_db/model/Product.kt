@@ -15,4 +15,7 @@ data class Product(
     val productPrize: Double,
     @Column(name = "category", length = 25)
     val category: String,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    val image: Image
 )

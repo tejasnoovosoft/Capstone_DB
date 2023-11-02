@@ -2,8 +2,9 @@ package com.example.capstone_db.service
 
 import com.example.capstone_db.model.Product
 import com.example.capstone_db.repository.ProductRepository
+import com.example.capstone_db.viewmodel.ProductOutputViewModel
 import com.example.capstone_db.viewmodel.ProductViewModel
-import com.example.capstone_db.viewmodel.convertToProductViewModel
+import com.example.capstone_db.viewmodel.convertToProductOutputViewModel
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.ResponseEntity
@@ -15,24 +16,24 @@ class ProductService(private val productRepository: ProductRepository) {
         return productRepository.findByproductName(product.productName) ?: productRepository.save(product)
     }
 
-    fun getProducts(): List<ProductViewModel>? {
+    fun getProducts(): List<ProductOutputViewModel>? {
         val products = productRepository.findAll()
-        return products.map { convertToProductViewModel(it) }
+        return products.map { convertToProductOutputViewModel(it) }
     }
 
-    fun findProductById(productId: Long): ProductViewModel? {
+    fun findProductById(productId: Long): ProductOutputViewModel? {
         val product = productRepository.findByIdOrNull(productId)
-        return product?.let { convertToProductViewModel(it) }
+        return product?.let { convertToProductOutputViewModel(it) }
     }
 
-    fun findProductsByCategory(category: String): List<ProductViewModel>? {
+    fun findProductsByCategory(category: String): List<ProductOutputViewModel>? {
         val products = productRepository.findByCategory(category)
-        return products?.map { convertToProductViewModel(it) }
+        return products?.map { convertToProductOutputViewModel(it) }
     }
 
-    fun findProductsBetweenPrice(minPrice: Double, maxPrice: Double): List<ProductViewModel>? {
+    fun findProductsBetweenPrice(minPrice: Double, maxPrice: Double): List<ProductOutputViewModel>? {
         val products = productRepository.findProductsByProductPrizeBetween(minPrice, maxPrice)
-        return products?.map { convertToProductViewModel(it) }
+        return products?.map { convertToProductOutputViewModel(it) }
     }
 
     fun deleteProductById(productId: Long) {
@@ -40,7 +41,7 @@ class ProductService(private val productRepository: ProductRepository) {
     }
 
     @Transactional
-    fun updateProductById(productId: Long, productViewModel: ProductViewModel) {
+    fun updateProductById(productId: Long, productViewModel: ProductOutputViewModel) {
         val rowsUpdated = productRepository.updateProduct(
             productId = productId,
             productName = productViewModel.productName,
@@ -58,13 +59,13 @@ class ProductService(private val productRepository: ProductRepository) {
         }
     }
 
-    fun getProductByName(productName: String): ProductViewModel? {
+    fun getProductByName(productName: String): ProductOutputViewModel? {
         val product = productRepository.findByproductName(productName)
-        return product?.let { convertToProductViewModel(it) }
+        return product?.let { convertToProductOutputViewModel(it) }
     }
 
-    fun searchProducts(product: String): ResponseEntity<List<ProductViewModel>> {
+    fun searchProducts(product: String): ResponseEntity<List<ProductOutputViewModel>> {
         val products = productRepository.findProductByProductNameContaining(product)
-        return ResponseEntity.ok(products?.map { convertToProductViewModel(it) })
+        return ResponseEntity.ok(products?.map { convertToProductOutputViewModel(it) })
     }
 }
