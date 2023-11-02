@@ -3,7 +3,6 @@ package com.example.capstone_db.service
 import com.example.capstone_db.model.Product
 import com.example.capstone_db.repository.ProductRepository
 import com.example.capstone_db.viewmodel.ProductOutputViewModel
-import com.example.capstone_db.viewmodel.ProductViewModel
 import com.example.capstone_db.viewmodel.convertToProductOutputViewModel
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
