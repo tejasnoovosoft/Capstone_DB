@@ -16,6 +16,7 @@ java {
 }
 
 repositories {
+    google()
     mavenCentral()
 }
 
@@ -41,6 +42,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("com.google.firebase:firebase-admin:8.2.0")
 }
 
 tasks.withType<KotlinCompile> {

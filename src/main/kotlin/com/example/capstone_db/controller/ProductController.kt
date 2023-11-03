@@ -1,7 +1,7 @@
 package com.example.capstone_db.controller
 
 import com.example.capstone_db.model.Product
-import com.example.capstone_db.service.ImageService
+import com.example.capstone_db.service.FirebaseStorageService
 import com.example.capstone_db.service.ProductService
 import com.example.capstone_db.viewmodel.ProductOutputViewModel
 import com.example.capstone_db.viewmodel.ProductViewModel
@@ -12,20 +12,24 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/products")
-class ProductController(private val productService: ProductService, private val imageService: ImageService) {
+class ProductController(
+    private val productService: ProductService,
+    private val firebaseStorageService: FirebaseStorageService
+) {
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     fun addProduct(
         @RequestPart productViewModel: ProductViewModel, @RequestPart file: List<MultipartFile>
-    ): Product? {
-        val image = imageService.convertToImage(file)
+    ) {
+        val bucketName = "capstone-db-6a168.appspot.com"
+        val image = firebaseStorageService.uploadFile(file, bucketName)
         val product = Product(
             productName = productViewModel.productName,
             productPrize = productViewModel.productPrize,
             category = productViewModel.category,
             image = image
         )
-        return productService.addProduct(product)
+        productService.addProduct(product)
     }
 
     @GetMapping

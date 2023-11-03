@@ -15,7 +15,7 @@ class ImageService(
     @Value("\${imagedatabase}")
     private val baseUrl: String,
     @Value("\${imageserver}")
-    private val uploadPath: String // Specify the upload directory in your application.properties
+    private val uploadPath: String
 ) {
     fun convertToImage(file: List<MultipartFile>): List<Image> {
         return file.map {
