@@ -5,6 +5,7 @@ import com.example.capstone_db.service.FirebaseStorageService
 import com.example.capstone_db.service.ProductService
 import com.example.capstone_db.viewmodel.ProductOutputViewModel
 import com.example.capstone_db.viewmodel.ProductViewModel
+import com.google.firebase.cloud.StorageClient
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -21,12 +22,13 @@ class ProductController(
     @PreAuthorize("hasAuthority('ADMIN')")
     fun addProduct(
         @RequestPart productViewModel: ProductViewModel, @RequestPart file: List<MultipartFile>
-    ): CompletableFuture<String> {
+    ): String {
 
-        val bucketName = "capstone-db-6a168.appspot.com"
-        val startTime = System.currentTimeMillis()
+        val imageListFuture = CompletableFuture.supplyAsync {
+            firebaseStorageService.uploadFile(file).join()
+        }
 
-        return firebaseStorageService.uploadFile(file, bucketName).thenApply { imageList ->
+        val productFuture = imageListFuture.thenApplyAsync { imageList ->
             val product = Product(
                 productName = productViewModel.productName,
                 productPrize = productViewModel.productPrize,
@@ -34,13 +36,12 @@ class ProductController(
                 image = imageList
             )
             productService.addProduct(product)
-        }.thenApply { _ ->
-            val endTime = System.currentTimeMillis()
-            val executionTime = endTime - startTime
-            println("Upload and product creation completed in $executionTime milliseconds")
-            "Product Added Successfully"
         }
+
+        productFuture.join()
+        return "Product Added Successfully"
     }
+
 
     @GetMapping
     fun getProducts(): List<ProductOutputViewModel>? {

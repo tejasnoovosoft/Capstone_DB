@@ -15,8 +15,7 @@ class FirebaseStorageService(
 ) {
     @Async("threadPoolTaskExecutor")
     fun uploadFile(
-        file: List<MultipartFile>,
-        bucketName: String
+        file: List<MultipartFile>
     ): CompletableFuture<List<Image>> {
         val futures = (file.map { multipartFile ->
             CompletableFuture.supplyAsync({
@@ -24,9 +23,9 @@ class FirebaseStorageService(
                 val uuid = randomUUID().toString()
                 val extension = multipartFile.originalFilename?.substringAfterLast('.')
                 val fileName = "$uuid.$extension"
-                val bucket = StorageClient.getInstance().bucket(bucketName)
+                val bucket = StorageClient.getInstance().bucket()
                 bucket.create(fileName, multipartFile.bytes, multipartFile.contentType)
-                val url = "https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${fileName}?alt=media"
+                val url = "https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileName}?alt=media"
                 Image(url = url)
             }, threadPoolTaskExecutor)
         })
