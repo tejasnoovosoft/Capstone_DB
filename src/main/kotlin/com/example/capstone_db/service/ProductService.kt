@@ -11,8 +11,13 @@ import org.springframework.stereotype.Service
 
 @Service
 class ProductService(private val productRepository: ProductRepository) {
+    @Transactional
     fun addProduct(product: Product): Product? {
-        return productRepository.findByproductName(product.productName) ?: productRepository.save(product)
+        return try {
+            productRepository.findByproductName(product.productName) ?: productRepository.save(product)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     fun getProducts(): List<ProductOutputViewModel>? {

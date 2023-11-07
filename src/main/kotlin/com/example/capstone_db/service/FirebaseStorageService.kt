@@ -2,23 +2,40 @@ package com.example.capstone_db.service
 
 import com.example.capstone_db.model.Image
 import com.google.firebase.cloud.StorageClient
+import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.util.UUID.randomUUID
+import java.util.concurrent.CompletableFuture
 
 @Service
-class FirebaseStorageService {
+class FirebaseStorageService(
+    private val threadPoolTaskExecutor: ThreadPoolTaskExecutor
+) {
+    @Async("threadPoolTaskExecutor")
+    fun uploadFile(
+        file: List<MultipartFile>,
+        bucketName: String
+    ): CompletableFuture<List<Image>> {
+        val futures = (file.map { multipartFile ->
+            CompletableFuture.supplyAsync({
+                println("InSide : ${Thread.currentThread().name}")
+                val uuid = randomUUID().toString()
+                val extension = multipartFile.originalFilename?.substringAfterLast('.')
+                val fileName = "$uuid.$extension"
+                val bucket = StorageClient.getInstance().bucket(bucketName)
+                bucket.create(fileName, multipartFile.bytes, multipartFile.contentType)
+                val url = "https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${fileName}?alt=media"
+                Image(url = url)
+            }, threadPoolTaskExecutor)
+        })
 
-    fun uploadFile(file: List<MultipartFile>, bucketName: String): List<Image> {
-        val bucket = StorageClient.getInstance().bucket(bucketName)
-        return file.map {
-            val uuid = randomUUID().toString()
-            val extension = it.originalFilename?.substringAfterLast('.')
-            val fileName = "$uuid.$extension"
+        val allFutures = CompletableFuture.allOf(*futures.toTypedArray())
 
-            bucket.create(fileName, it.bytes, it.contentType)
-            val url = "https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${fileName}?alt=media"
-            Image(url = url)
+        return allFutures.thenApply {
+            futures.map { it.join() }
         }
     }
+
 }

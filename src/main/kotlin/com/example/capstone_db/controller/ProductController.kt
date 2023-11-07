@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.util.concurrent.CompletableFuture
 
 @RestController
 @RequestMapping("/products")
@@ -20,16 +21,25 @@ class ProductController(
     @PreAuthorize("hasAuthority('ADMIN')")
     fun addProduct(
         @RequestPart productViewModel: ProductViewModel, @RequestPart file: List<MultipartFile>
-    ) {
+    ): CompletableFuture<String> {
+
         val bucketName = "capstone-db-6a168.appspot.com"
-        val image = firebaseStorageService.uploadFile(file, bucketName)
-        val product = Product(
-            productName = productViewModel.productName,
-            productPrize = productViewModel.productPrize,
-            category = productViewModel.category,
-            image = image
-        )
-        productService.addProduct(product)
+        val startTime = System.currentTimeMillis()
+
+        return firebaseStorageService.uploadFile(file, bucketName).thenApply { imageList ->
+            val product = Product(
+                productName = productViewModel.productName,
+                productPrize = productViewModel.productPrize,
+                category = productViewModel.category,
+                image = imageList
+            )
+            productService.addProduct(product)
+        }.thenApply { _ ->
+            val endTime = System.currentTimeMillis()
+            val executionTime = endTime - startTime
+            println("Upload and product creation completed in $executionTime milliseconds")
+            "Product Added Successfully"
+        }
     }
 
     @GetMapping
