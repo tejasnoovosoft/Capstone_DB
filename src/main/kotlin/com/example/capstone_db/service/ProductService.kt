@@ -3,20 +3,44 @@ package com.example.capstone_db.service
 import com.example.capstone_db.model.Product
 import com.example.capstone_db.repository.ProductRepository
 import com.example.capstone_db.viewmodel.ProductOutputViewModel
+import com.example.capstone_db.viewmodel.ProductViewModel
 import com.example.capstone_db.viewmodel.convertToProductOutputViewModel
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import java.io.File
+import java.nio.file.Files
+import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 
 @Service
-class ProductService(private val productRepository: ProductRepository) {
-    @Transactional
-    fun addProduct(product: Product): Product? {
-        return try {
-            productRepository.findByproductName(product.productName) ?: productRepository.save(product)
-        } catch (e: Exception) {
-            null
+class ProductService(
+    private val productRepository: ProductRepository,
+    private val firebaseStorageService: FirebaseStorageService
+) {
+    fun addProducts(productItems: List<ProductViewModel>) {
+        val executor = Executors.newFixedThreadPool(productItems.size)
+        for (productItem in productItems) {
+            CompletableFuture.runAsync({
+                val (productName, productPrize, category, images) = productItem
+                val imageUrls = images.map { imagePath ->
+                    val file = File(imagePath)
+                    val imageBytes = Files.readAllBytes(file.toPath())
+                    val base64EncodedString = Base64.getEncoder().encodeToString(imageBytes)
+                    val imageName = file.name
+                    firebaseStorageService.uploadImage(base64EncodedString, imageName)
+                }
+                val product =
+                    Product(
+                        productName = productName,
+                        productPrize = productPrize,
+                        category = category,
+                        image = imageUrls
+                    )
+                productRepository.save(product)
+            }, executor)
         }
     }
 

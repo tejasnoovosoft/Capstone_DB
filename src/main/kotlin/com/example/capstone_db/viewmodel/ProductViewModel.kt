@@ -5,7 +5,8 @@ import com.example.capstone_db.model.Product
 data class ProductViewModel(
     val productName: String,
     val productPrize: Double,
-    val category: String
+    val category: String,
+    val images: List<String>
 )
 data class ProductOutputViewModel(
     val productId: Long?,

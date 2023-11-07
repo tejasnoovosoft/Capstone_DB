@@ -33,17 +33,18 @@ class ImageService(
             }
         }
     }
+
+    fun convertToByteArray(image: List<Image>): List<ByteArray> {
+        return image.map { Files.readAllBytes(File(it.url).toPath()) }
+
+    }
 }
 
-fun convertToByteArray(image: Image): ByteArray {
-    val imagePath = image.url
-    return Files.readAllBytes(File(imagePath).toPath())
 
-}
 
-fun determineContentType(imagePath: Path): String {
-    val fileName = imagePath.fileName.toString()
-    val extension = fileName.substringAfterLast('.')
+fun determineContentType(imagePath: String): String {
+//    val fileName = imagePath.fileName.toString()
+    val extension = imagePath.substringAfterLast('.')
     return when (extension.lowercase(Locale.getDefault())) {
         "jpg", "jpeg" -> "image/jpeg"
         "png" -> "image/png"

@@ -6,3 +6,4 @@ class ProductNotFoundException(message: String) : RuntimeException(message)
 
 class UserExistsException(message: String) : RuntimeException(message)
 
+class CustomException(message: String) : RuntimeException(message)

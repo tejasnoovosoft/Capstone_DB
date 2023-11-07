@@ -1,45 +1,31 @@
 package com.example.capstone_db.controller
 
-import com.example.capstone_db.model.Product
-import com.example.capstone_db.service.FirebaseStorageService
+import com.example.capstone_db.service.CustomException
 import com.example.capstone_db.service.ProductService
 import com.example.capstone_db.viewmodel.ProductOutputViewModel
 import com.example.capstone_db.viewmodel.ProductViewModel
-import com.google.firebase.cloud.StorageClient
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
 import java.util.concurrent.CompletableFuture
 
 @RestController
 @RequestMapping("/products")
 class ProductController(
     private val productService: ProductService,
-    private val firebaseStorageService: FirebaseStorageService
 ) {
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    fun addProduct(
-        @RequestPart productViewModel: ProductViewModel, @RequestPart file: List<MultipartFile>
-    ): String {
-
-        val imageListFuture = CompletableFuture.supplyAsync {
-            firebaseStorageService.uploadFile(file).join()
+    fun addProducts(@RequestPart productItems: List<ProductViewModel>): String {
+        try {
+            val products = CompletableFuture.runAsync {
+                productService.addProducts(productItems)
+            }
+            products.join()
+            return "Products Added Successfully"
+        } catch (e: Exception) {
+            throw CustomException("An error occurred while adding products: " + e.message)
         }
-
-        val productFuture = imageListFuture.thenApplyAsync { imageList ->
-            val product = Product(
-                productName = productViewModel.productName,
-                productPrize = productViewModel.productPrize,
-                category = productViewModel.category,
-                image = imageList
-            )
-            productService.addProduct(product)
-        }
-
-        productFuture.join()
-        return "Product Added Successfully"
     }
 
 
