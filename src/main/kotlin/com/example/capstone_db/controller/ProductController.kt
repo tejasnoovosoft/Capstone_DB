@@ -18,10 +18,7 @@ class ProductController(
     @PreAuthorize("hasAuthority('ADMIN')")
     fun addProducts(@RequestPart productItems: List<ProductViewModel>): String {
         try {
-            val products = CompletableFuture.runAsync {
-                productService.addProducts(productItems)
-            }
-            products.join()
+            productService.addProducts(productItems)
             return "Products Added Successfully"
         } catch (e: Exception) {
             throw CustomException("An error occurred while adding products: " + e.message)
