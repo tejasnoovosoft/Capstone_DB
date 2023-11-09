@@ -1,12 +1,16 @@
 package com.example.capstone_db.service
 
 import com.example.capstone_db.model.Image
+import com.google.auth.oauth2.GoogleCredentials
+import com.google.cloud.storage.StorageOptions
+import com.google.firebase.FirebaseApp
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.*
 
@@ -36,6 +40,10 @@ class ImageService(
 
     fun convertToByteArray(image: List<Image>): List<ByteArray> {
         return image.map { Files.readAllBytes(File(it.url).toPath()) }
+
+    }
+
+    fun getImageBytesFromFirebase(imageUrl: String) {
 
     }
 }

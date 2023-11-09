@@ -100,4 +100,8 @@ class ProductService(
         val products = productRepository.findProductByProductNameContaining(product)
         return ResponseEntity.ok(products?.map { convertToProductOutputViewModel(it) })
     }
+
+    fun getProductImagesById(productId: Long): List<String>? {
+        return productRepository.getProductImageUrls(productId)
+    }
 }

@@ -36,4 +36,7 @@ interface ProductRepository : JpaRepository<Product, Long> {
     fun findProductByProductNameContaining(name: String): List<Product>?
 
     fun findProductsByProductPrizeBetween(minPrice: Double, maxPrice: Double): List<Product>?
+
+    @Query("SELECT i.url FROM Product p JOIN p.image i WHERE p.productId = :productId")
+    fun getProductImageUrls(productId: Long): List<String>
 }
