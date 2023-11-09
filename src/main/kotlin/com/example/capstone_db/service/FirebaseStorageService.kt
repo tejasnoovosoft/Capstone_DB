@@ -30,6 +30,7 @@ class FirebaseStorageService{
             futures.map { it.join() }
         }
     }*/
+
     fun uploadImage(base64EncodedImage: String, imageName: String): Image {
         val imageBytes = Base64.getDecoder().decode(base64EncodedImage)
         val uuid = randomUUID().toString()

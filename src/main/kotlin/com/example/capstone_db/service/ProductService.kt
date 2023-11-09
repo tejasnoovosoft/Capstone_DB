@@ -6,24 +6,28 @@ import com.example.capstone_db.viewmodel.ProductOutputViewModel
 import com.example.capstone_db.viewmodel.ProductViewModel
 import com.example.capstone_db.viewmodel.convertToProductOutputViewModel
 import jakarta.transaction.Transactional
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.ResponseEntity
+import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executors
 
 @Service
 class ProductService(
     private val productRepository: ProductRepository,
-    private val firebaseStorageService: FirebaseStorageService
+    private val firebaseStorageService: FirebaseStorageService,
+    @Qualifier("threadPoolTaskExecutor") private val threadPoolTaskExecutor: ThreadPoolTaskExecutor
 ) {
+    @Async("threadPoolTaskExecutor")
     fun addProducts(productItems: List<ProductViewModel>) {
-        val executor = Executors.newFixedThreadPool(productItems.size)
         for (productItem in productItems) {
             CompletableFuture.runAsync({
+                println(Thread.currentThread().name)
                 val (productName, productPrize, category, images) = productItem
                 val imageUrls = images.map { imagePath ->
                     val file = File(imagePath)
@@ -40,7 +44,7 @@ class ProductService(
                         image = imageUrls
                     )
                 productRepository.save(product)
-            }, executor)
+            }, threadPoolTaskExecutor)
         }
     }
 
