@@ -56,18 +56,14 @@ class ImageProcessingService(
 
         while (true) {
             val imageUrls = mutableListOf<String>()
-
             repeat(batchSize) {
                 imageProcessingQueue.poll()?.let { imageUrl ->
                     imageUrls.add(imageUrl)
                 }
             }
-
             if (imageUrls.isEmpty()) {
                 break
             }
-
-            println(imageUrls)
 
             val batchFutures = imageUrls.map { imageUrl ->
                 CompletableFuture.supplyAsync({
