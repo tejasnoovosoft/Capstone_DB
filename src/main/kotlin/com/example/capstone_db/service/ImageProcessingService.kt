@@ -54,17 +54,13 @@ class ImageProcessingService(
     fun startImageProcessing(batchSize: Int): CompletableFuture<List<Image>> {
         val imageFutures = mutableListOf<CompletableFuture<Image>>()
 
-        while (true) {
+        while (!imageProcessingQueue.isEmpty()) {
             val imageUrls = mutableListOf<String>()
             repeat(batchSize) {
                 imageProcessingQueue.poll()?.let { imageUrl ->
                     imageUrls.add(imageUrl)
                 }
             }
-            if (imageUrls.isEmpty()) {
-                break
-            }
-
             val batchFutures = imageUrls.map { imageUrl ->
                 CompletableFuture.supplyAsync({
                     processImage(imageUrl)
@@ -87,10 +83,11 @@ class ImageProcessingService(
             upscaleImage()
             downscaleImage()
             addWatermark()
+            return uploadImage(imageUrl)
         } catch (e: Exception) {
             logger.error("Error processing image $imageUrl", e)
+            throw e
         }
-        return uploadImage(imageUrl)
     }
 
     private fun upscaleImage() {
@@ -112,12 +109,30 @@ class ImageProcessingService(
     }
 
     private fun uploadImage(imageUrl: String): Image {
+        try {
+            val imageSizeBytes = getImageSize(imageUrl)
+            if (imageSizeBytes > 330 * 1024) {
+                throw ImageSizeExceededException("Image size exceeds 330KB. Image processing aborted for $imageUrl")
+            }
+            val file = File(imageUrl)
+            val imageBytes = Files.readAllBytes(file.toPath())
+            val base64EncodedString = Base64.getEncoder().encodeToString(imageBytes)
+            val imageName = file.name
+            val image = firebaseStorageService.uploadImage(base64EncodedString, imageName)
+            logger.info("Imaged Uploaded Successful...!")
+            return image
+        } catch (e: ImageSizeExceededException) {
+            logger.info(e.message)
+            return getDefaultImage()
+        }
+    }
+
+    private fun getImageSize(imageUrl: String): Long {
         val file = File(imageUrl)
-        val imageBytes = Files.readAllBytes(file.toPath())
-        val base64EncodedString = Base64.getEncoder().encodeToString(imageBytes)
-        val imageName = file.name
-        val image = firebaseStorageService.uploadImage(base64EncodedString, imageName)
-        logger.info("Imaged Uploaded Successful...!")
-        return image
+        return Files.size(file.toPath())
+    }
+
+    private fun getDefaultImage(): Image {
+        return Image(url = null)
     }
 }

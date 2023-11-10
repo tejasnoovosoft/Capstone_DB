@@ -42,14 +42,14 @@ class ProductService(
 
     fun addProduct(productItem: ProductViewModel) {
         imageProcessingService.addingTaskInQueue(productItem.images)
-        val imageUrls = imageProcessingService.startImageProcessing(2).join()
+        val imageUrls = imageProcessingService.startImageProcessing(3).join()
 
         val product =
             Product(
                 productName = productItem.productName,
                 productPrize = productItem.productPrize,
                 category = productItem.category,
-                image = imageUrls
+                image = imageUrls.filter { it.url != null }
             )
         productRepository.save(product)
     }
