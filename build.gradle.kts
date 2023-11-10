@@ -45,6 +45,9 @@ dependencies {
     implementation("com.google.firebase:firebase-admin:8.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
     implementation("net.coobird:thumbnailator:0.4.14")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.0")
 }
 
 tasks.withType<KotlinCompile> {

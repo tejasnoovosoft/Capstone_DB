@@ -7,14 +7,13 @@ import com.example.capstone_db.viewmodel.ProductViewModel
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import java.util.concurrent.CompletableFuture
 
 @RestController
 @RequestMapping("/products")
 class ProductController(
     private val productService: ProductService,
 ) {
-    @PostMapping
+    /*@PostMapping("/multiple")
     @PreAuthorize("hasAuthority('ADMIN')")
     fun addProducts(@RequestPart productItems: List<ProductViewModel>): String {
         try {
@@ -23,8 +22,18 @@ class ProductController(
         } catch (e: Exception) {
             throw CustomException("An error occurred while adding products: " + e.message)
         }
-    }
+    }*/
 
+    @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
+    fun addProduct(@RequestPart productItem: ProductViewModel): String {
+        try {
+            productService.addProduct(productItem)
+            return "Product Added Successfully"
+        } catch (e: Exception) {
+            throw CustomException("An error occurred while adding products : " + e.message)
+        }
+    }
 
     @GetMapping
     fun getProducts(): List<ProductOutputViewModel>? {

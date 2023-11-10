@@ -11,9 +11,8 @@ class AsyncConfig {
     @Bean(name = ["threadPoolTaskExecutor"])
     fun getThreadPoolExecutor(): ThreadPoolTaskExecutor {
         val executor = ThreadPoolTaskExecutor()
-        executor.corePoolSize = 20
-        executor.maxPoolSize = 20
-        executor.queueCapacity = 200
+        executor.corePoolSize = 3
+        executor.maxPoolSize = 5
         executor.setThreadNamePrefix("MyThread-")
         executor.initialize()
         return executor

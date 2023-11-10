@@ -6,46 +6,52 @@ import com.example.capstone_db.viewmodel.ProductOutputViewModel
 import com.example.capstone_db.viewmodel.ProductViewModel
 import com.example.capstone_db.viewmodel.convertToProductOutputViewModel
 import jakarta.transaction.Transactional
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.ResponseEntity
-import org.springframework.scheduling.annotation.Async
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
-import java.io.File
-import java.nio.file.Files
-import java.util.*
-import java.util.concurrent.CompletableFuture
 
 @Service
 class ProductService(
     private val productRepository: ProductRepository,
-    private val firebaseStorageService: FirebaseStorageService,
-    @Qualifier("threadPoolTaskExecutor") private val threadPoolTaskExecutor: ThreadPoolTaskExecutor
+    private val imageProcessingService: ImageProcessingService
 ) {
-    @Async("threadPoolTaskExecutor")
-    fun addProducts(productItems: List<ProductViewModel>) {
-        for (productItem in productItems) {
-            CompletableFuture.runAsync({
-                println(Thread.currentThread().name)
-                val (productName, productPrize, category, images) = productItem
-                val imageUrls = images.map { imagePath ->
-                    val file = File(imagePath)
-                    val imageBytes = Files.readAllBytes(file.toPath())
-                    val base64EncodedString = Base64.getEncoder().encodeToString(imageBytes)
-                    val imageName = file.name
-                    firebaseStorageService.uploadImage(base64EncodedString, imageName)
-                }
-                val product =
-                    Product(
-                        productName = productName,
-                        productPrize = productPrize,
-                        category = category,
-                        image = imageUrls
-                    )
-                productRepository.save(product)
-            }, threadPoolTaskExecutor)
-        }
+
+    /*    @Async("threadPoolTaskExecutor")
+        fun addProducts(productItems: List<ProductViewModel>) {
+            for (productItem in productItems) {
+                CompletableFuture.runAsync({
+                    val (productName, productPrize, category, images) = productItem
+                    val imageUrls = images.map { imagePath ->
+                        val file = File(imagePath)
+                        val imageBytes = Files.readAllBytes(file.toPath())
+                        val base64EncodedString = Base64.getEncoder().encodeToString(imageBytes)
+                        val imageName = file.name
+                        firebaseStorageService.uploadImage(base64EncodedString, imageName)
+                    }
+                    val product =
+                        Product(
+                            productName = productName,
+                            productPrize = productPrize,
+                            category = category,
+                            image = imageUrls
+                        )
+                    productRepository.save(product)
+                }, threadPoolTaskExecutor)
+            }
+        }*/
+
+    fun addProduct(productItem: ProductViewModel) {
+        imageProcessingService.addingTaskInQueue(productItem.images)
+        val imageUrls = imageProcessingService.startImageProcessing(2).join()
+
+        val product =
+            Product(
+                productName = productItem.productName,
+                productPrize = productItem.productPrize,
+                category = productItem.category,
+                image = imageUrls
+            )
+        productRepository.save(product)
     }
 
     fun getProducts(): List<ProductOutputViewModel>? {
