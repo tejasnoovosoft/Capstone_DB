@@ -1,5 +1,6 @@
 package com.example.capstone_db.service
 
+import com.example.capstone_db.model.Image
 import com.example.capstone_db.model.Product
 import com.example.capstone_db.repository.ProductRepository
 import com.example.capstone_db.viewmodel.ProductOutputViewModel
@@ -9,11 +10,14 @@ import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import java.io.File
+import java.nio.file.Files
+import java.util.concurrent.CompletableFuture
 
 @Service
 class ProductService(
     private val productRepository: ProductRepository,
-    private val imageProcessingService: ImageProcessingService
+    private val imageService: ImageService
 ) {
 
     /*    @Async("threadPoolTaskExecutor")
@@ -41,15 +45,21 @@ class ProductService(
         }*/
 
     fun addProduct(productItem: ProductViewModel) {
-        imageProcessingService.addingTaskInQueue(productItem.images)
-        val imageUrls = imageProcessingService.startImageProcessing(2).join()
 
+        val imageUrls = productItem.images.map {
+            val file = File(it)
+            val imageBytes = Files.readAllBytes(file.toPath())
+            imageService.uploadImage(imageBytes)
+        }
+
+        val imageList: List<Image> = imageUrls.map(CompletableFuture<Image>::join)
+
+        println("Before Add Product")
         val product =
             Product(
                 productName = productItem.productName,
                 productPrize = productItem.productPrize,
-                category = productItem.category,
-                image = imageUrls
+                category = productItem.category, image = imageList
             )
         productRepository.save(product)
     }

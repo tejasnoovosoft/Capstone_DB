@@ -6,8 +6,8 @@ import jakarta.persistence.*
 @Table(name = "images")
 data class Image(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long = 0,
 
     @Column(name = "url", columnDefinition = "TEXT")
-    val url: String,
+    val url: String
 )

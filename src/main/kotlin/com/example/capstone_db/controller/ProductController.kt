@@ -1,17 +1,20 @@
 package com.example.capstone_db.controller
 
 import com.example.capstone_db.service.CustomException
+import com.example.capstone_db.service.ImageService
 import com.example.capstone_db.service.ProductService
 import com.example.capstone_db.viewmodel.ProductOutputViewModel
 import com.example.capstone_db.viewmodel.ProductViewModel
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/products")
 class ProductController(
     private val productService: ProductService,
+    private val imageService: ImageService,
 ) {
     /*@PostMapping("/multiple")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -33,6 +36,16 @@ class ProductController(
         } catch (e: Exception) {
             throw CustomException("An error occurred while adding products : " + e.message)
         }
+    }
+
+    @PostMapping("/{productId}/images")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    fun uploadImages(
+        @PathVariable productId: Long,
+        @RequestPart files: List<MultipartFile>
+    ): String {
+        files.map { imageService.uploadImage(it.bytes) }
+        return "Images upload started"
     }
 
     @GetMapping

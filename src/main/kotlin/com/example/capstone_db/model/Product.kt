@@ -16,6 +16,6 @@ data class Product(
     @Column(name = "category", length = 25)
     val category: String,
 
-    @OneToMany(cascade = [CascadeType.ALL])
-    val image: List<Image>
+    @OneToMany(cascade = [CascadeType.REMOVE])
+    val image: List<Image> = listOf()
 )
