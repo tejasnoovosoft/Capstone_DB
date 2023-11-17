@@ -1,6 +1,7 @@
 package com.example.capstone_db.queue
 
 import com.example.capstone_db.model.Image
+import com.example.capstone_db.model.Status
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -8,7 +9,7 @@ import java.time.LocalDateTime
 data class ImageTask(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    override  val id: Long = 0,
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
@@ -16,28 +17,13 @@ data class ImageTask(
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    var status: ImageTaskStatus = ImageTaskStatus.PENDING,
+    var status: Status = Status.PENDING,
 
     @ManyToOne
     @JoinColumn(name = "image_id")
     val image: Image,
 
-    @Column(name = "last_attempt_time")
-    var lastAttemptTime: LocalDateTime? = null,
-
-    @Column(name = "next_attempt_time")
-    var nextAttemptTime: LocalDateTime? = LocalDateTime.now(),
-
-    @Column(name = "last_attempt_error_message")
-    var lastAttemptErrorMessage: String? = null
-)
-
-enum class ImageTaskStatus {
-    PENDING,
-    ERROR,
-    SUCCESS
-}
-
+    ) : Task()
 enum class ImageTaskType {
     WATERMARK,
     DOWNSCALE,

@@ -16,6 +16,8 @@ interface UserRepository : JpaRepository<User, Long>{
 
     fun existsUserByEmail(email: String): Boolean
 
+    fun findUserByUserId(userId: Long): User?
+
     @Modifying
     @Query("UPDATE User u SET u.password = :newPassword WHERE u.userId = :userId")
     fun changePassword(userId: Long, newPassword: String)

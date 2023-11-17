@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
 
-interface TaskProcessing {
+interface ImageTaskProcessing {
     fun addWaterMark(inputImageBytes: ByteArray, watermarkImageBytes: ByteArray): ByteArray {
         println("WaterMarking image in Thread: ${Thread.currentThread().name}")
 

@@ -1,8 +1,12 @@
 package com.example.capstone_db.queue
 
+import com.example.capstone_db.model.Status
+import com.example.capstone_db.repository.EmailTaskRepository
 import com.example.capstone_db.repository.ImageTaskRepository
+import com.example.capstone_db.repository.TaskRepository
 import com.example.capstone_db.service.CustomException
 import com.example.capstone_db.service.ImageService
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -11,32 +15,36 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Files
 import java.time.LocalDateTime
-import javax.annotation.PostConstruct
 
 @Service
-class ImageTaskService(
+class TaskService(
+    private val taskRepository: TaskRepository,
+    @Qualifier("threadPoolTaskExecutor") val taskExecutor: ThreadPoolTaskExecutor,
     private val imageService: ImageService,
     private val imageTaskRepository: ImageTaskRepository,
-    @Qualifier("threadPoolTaskExecutor") val taskExecutor: ThreadPoolTaskExecutor
-) : TaskProcessing {
+    private val emailTaskRepository: EmailTaskRepository
+) : ImageTaskProcessing {
+
+    @Value("\${watermark}")
+    private lateinit var watermark: String
+
     @PostConstruct
     fun init() {
         startProcessing()
     }
 
-    @Value("\${watermark}")
-    private lateinit var watermark: String
-
     fun startProcessing() {
         try {
             taskExecutor.execute {
                 while (true) {
-                    val imageTasks = imageTaskRepository.findByNextAttemptTimeLessThanAndStatusOrderByNextAttemptTime(
-                        LocalDateTime.now(), ImageTaskStatus.PENDING, PageRequest.of(0, 10)
+                    val tasks = taskRepository.findByNextAttemptTimeLessThanAndTaskStatusOrderByNextAttemptTime(
+                        LocalDateTime.now(), Status.PENDING, PageRequest.of(0, 10)
                     )
-                    imageTasks.forEach {
-                        taskExecutor.execute { processTask(it) }
+
+                    tasks.forEach {
+                        processTask(it)
                     }
+
                     println("Thread name: ${Thread.currentThread().name}")
                     Thread.sleep(10000)
                 }
@@ -46,8 +54,24 @@ class ImageTaskService(
         }
     }
 
-    fun processTask(task: ImageTask) {
+    fun processTask(task: Task) {
         task.lastAttemptTime = LocalDateTime.now()
+        try {
+            when (task) {
+                is ImageTask -> imageTask(task)
+                is EmailTask -> emailTask(task)
+            }
+            task.taskStatus = Status.SUCCESS
+        } catch (e: Exception) {
+            task.taskStatus = Status.ERROR
+            task.lastAttemptErrorMessage = e.message
+            e.printStackTrace()
+        }
+        task.nextAttemptTime = null
+        taskRepository.save(task)
+    }
+
+    fun imageTask(task: ImageTask) {
         try {
             val image = task.image
             val imageData: ByteArray = Files.readAllBytes(File(image.url).toPath())
@@ -65,15 +89,23 @@ class ImageTaskService(
 
                 else -> addWaterMark(imageData, watermarkImage)
             }
-            task.status = ImageTaskStatus.SUCCESS
+            task.status = Status.SUCCESS
             val filename = image.url.substringAfterLast("/").substringBeforeLast(".")
             imageService.uploadImageToFileSystem(updatedImageData, "${filename}_${task.type}.png", filename)
         } catch (e: Exception) {
-            task.status = ImageTaskStatus.ERROR
-            task.lastAttemptErrorMessage = e.message
+            task.status = Status.SUCCESS
             e.printStackTrace()
         }
-        task.nextAttemptTime = null
         imageTaskRepository.save(task)
+    }
+
+    fun emailTask(task: EmailTask) {
+        try {
+            task.status = Status.SUCCESS
+        } catch (e: Exception) {
+            task.status = Status.ERROR
+            e.printStackTrace()
+        }
+        emailTaskRepository.save(task)
     }
 }
