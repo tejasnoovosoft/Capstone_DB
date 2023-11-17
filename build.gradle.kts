@@ -48,6 +48,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.0")
+    implementation("org.imgscalr:imgscalr-lib:4.2")
+
 }
 
 tasks.withType<KotlinCompile> {

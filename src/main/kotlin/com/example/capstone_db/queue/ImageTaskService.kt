@@ -4,6 +4,7 @@ import com.example.capstone_db.repository.ImageTaskRepository
 import com.example.capstone_db.service.CustomException
 import com.example.capstone_db.service.ImageService
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
@@ -22,6 +23,9 @@ class ImageTaskService(
     fun init() {
         startProcessing()
     }
+
+    @Value("\${watermark}")
+    private lateinit var watermark: String
 
     fun startProcessing() {
         try {
@@ -47,18 +51,19 @@ class ImageTaskService(
         try {
             val image = task.image
             val imageData: ByteArray = Files.readAllBytes(File(image.url).toPath())
+            val watermarkImage: ByteArray = Files.readAllBytes(File(watermark).toPath())
             val updatedImageData = when (task.type) {
                 ImageTaskType.DOWNSCALE -> {
-                    val downScaleImage = downScaleImage(imageData)
-                    addWaterMark(downScaleImage)
+                    val downScaleImage = downScaleImage(imageData, 640, 640)
+                    addWaterMark(downScaleImage, watermarkImage)
                 }
 
                 ImageTaskType.UPSCALE -> {
-                    val upScaleImage = upscaleImage(imageData)
-                    addWaterMark(upScaleImage)
+                    val upScaleImage = upscaleImage(imageData, 1000, 1000)
+                    addWaterMark(upScaleImage, watermarkImage)
                 }
 
-                else -> addWaterMark(imageData)
+                else -> addWaterMark(imageData, watermarkImage)
             }
             task.status = ImageTaskStatus.SUCCESS
             val filename = image.url.substringAfterLast("/").substringBeforeLast(".")
