@@ -32,29 +32,24 @@ interface ImageTaskProcessing {
             .toOutputStream(outputStream)
         return outputStream.toByteArray()
     }
-
-    fun upscaleImage(inputImageBytes: ByteArray, targetWidth: Int, targetHeight: Int): ByteArray {
-        println("UpScaling image in Thread: ${Thread.currentThread().name}")
+    fun resizeImage(inputImageBytes: ByteArray, targetWidth: Int, targetHeight: Int): ByteArray {
         val inputImageStream = ByteArrayInputStream(inputImageBytes)
         val inputImage: BufferedImage = ImageIO.read(inputImageStream)
         val scaledImage: BufferedImage =
             Scalr.resize(inputImage, Scalr.Method.AUTOMATIC, Scalr.Mode.AUTOMATIC, targetWidth, targetHeight)
-
         val outputImageStream = ByteArrayOutputStream()
         ImageIO.write(scaledImage, "png", outputImageStream)
 
         return outputImageStream.toByteArray()
     }
 
+    fun upscaleImage(inputImageBytes: ByteArray, targetWidth: Int, targetHeight: Int): ByteArray {
+        println("UpScaling image in Thread: ${Thread.currentThread().name}")
+        return resizeImage(inputImageBytes, targetWidth, targetHeight)
+    }
+
     fun downScaleImage(inputImageBytes: ByteArray, targetWidth: Int, targetHeight: Int): ByteArray {
         println("DownScaling image in Thread: ${Thread.currentThread().name}")
-        val inputImageStream = ByteArrayInputStream(inputImageBytes)
-        val inputImage: BufferedImage = ImageIO.read(inputImageStream)
-        val scaledImage: BufferedImage =
-            Scalr.resize(inputImage, Scalr.Method.AUTOMATIC, Scalr.Mode.AUTOMATIC, targetWidth, targetHeight)
-
-        val outputImageStream = ByteArrayOutputStream()
-        ImageIO.write(scaledImage, "png", outputImageStream)
-        return outputImageStream.toByteArray()
+        return resizeImage(inputImageBytes, targetWidth, targetHeight)
     }
 }
